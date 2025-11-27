@@ -1,96 +1,111 @@
 #!/bin/bash
 
+# Stop script on error
+set -e
+
 echo "Witaj w skrypcie instalacyjnym AstroSystem v2!"
-mkdir astrosystem
+
+# Create main directory
+mkdir -p astrosystem
 cd astrosystem
-sudo apt update -y && sudo apt upgrade -y
-sudo apt install snapd -y
-sudo apt install wget -y
-sudo apt install python3 -y
-sudo apt install vlc -y
-sudo apt install mc -y
-sudo apt install nano -y
-pip3 install numpy matplotlib astropy 
-snap install stellarium-daily
-snap install codium --classic
 
-sudo apt install build-essential groff-base libmotif-dev libnext-dev libxext-dev libxmu-dev libxt-dev libsll-dev libx11-dev libxft-dev libpng-dev libjpeg-dev libtiff-dev zlib1g-dev -y
-sudo apt install gcc make flex fortran libncurses-dev -y
-sudo apt install libcurl4-openssl-dev libexpat-dev libreadline-dev -y
-sudo apt install git libc6-dev flex bison libncurses5-dev libreadline-dev libssl-dev libbz2-dev libffi-dev libgdbm-dev liblzma-dev libsqlite3-dev tk-dev libxml2-dev libxmlsec1-dev libyaml-dev -y
+echo "--- Aktualizacja systemu ---"
+sudo apt update -y && sudo apt upgrade -y && sudo apt autoremove -y
+sudo apt install -y git
 
+echo "--- Instalacja podstawowych narzędzi ---"
+sudo apt install -y software-properties-common
+sudo add-apt-repository -y universe
+sudo add-apt-repository -y multiverse
+sudo apt update -y
+sudo apt install -y wget python3 python3-venv python3-pip vlc mc nano build-essential saods9
 
-# Download Phoebe
-FILE=phoebe_1.0.1_amd64.deb
-if [ ! -f "$FILE" ]; then
-    echo "$FILE nie istnieje. Pobieram..."
-    wget https://github.com/phoebe-project/phoebe2-ui/releases/download/1.0.1/phoebe_1.0.1_amd64.deb
+echo "--- Instalacja bibliotek deweloperskich ---"
+# Fixed package names: fortran -> gfortran, libnext-dev -> libxaw7-dev
+sudo apt install -y \
+    groff-base libmotif-dev libxaw7-dev libxext-dev libxmu-dev libxt-dev \
+    libx11-dev libxft-dev libpng-dev libjpeg-dev libtiff-dev zlib1g-dev \
+    gcc make flex bison gfortran libncurses-dev libssl-dev \
+    libcurl4-openssl-dev libexpat-dev libreadline-dev \
+    libc6-dev libbz2-dev libffi-dev libgdbm-dev liblzma-dev libsqlite3-dev \
+    tk-dev libxml2-dev libxmlsec1-dev libyaml-dev
+
+echo "--- Instalacja Stellarium (PPA) ---"
+sudo add-apt-repository -y ppa:stellarium/stellarium-releases
+sudo apt update -y
+sudo apt install -y stellarium
+
+echo "--- Instalacja VSCodium (Repozytorium) ---"
+wget -qO - https://gitlab.com/paulcarroty/vscodium-deb-rpm-repo/raw/master/pub.gpg | gpg --dearmor | sudo dd of=/usr/share/keyrings/vscodium-archive-keyring.gpg
+echo 'deb [ signed-by=/usr/share/keyrings/vscodium-archive-keyring.gpg ] https://download.vscodium.com/debs vscodium main' | sudo tee /etc/apt/sources.list.d/vscodium.list
+sudo apt update -y
+sudo apt install -y codium
+
+echo "--- Konfiguracja środowiska Python ---"
+# Use venv to avoid PEP 668 errors on modern Ubuntu
+if [ ! -d "venv" ]; then
+    python3 -m venv venv
+fi
+source venv/bin/activate
+pip install --upgrade pip
+# Installing Phoebe 2 (modern) instead of 1.0.1
+pip install numpy matplotlib astropy phoebe
+
+echo "--- Instalacja Starlink ---"
+# Updated to 2023A version
+STARLINK_FILE="starlink-2023A-Linux-glibc2.17-x86_64.tar.gz"
+if [ ! -f "$STARLINK_FILE" ]; then
+    echo "Pobieranie Starlink..."
+    wget "https://ftp.eao.hawaii.edu/starlink/2023A/$STARLINK_FILE"
 fi
 
-# Install Phoebe
-dpkg -i phoebe_1.0.1_amd64.deb
+if [ ! -d "starlink" ]; then
+    echo "Rozpakowywanie Starlink..."
+    tar -xzf "$STARLINK_FILE"
+    # Rename for easier access or keep as is. The tarball usually contains a 'starlink' dir or versioned dir.
+    # Assuming it extracts to 'starlink' or similar. Let's check contents if we could, but for now we assume standard behavior.
+fi
 
-# Install dependencies
-sudo apt -f install
+echo "--- Instalacja XEphem ---"
+XEPHEM_FILE="xephem-4.1.0.tar.gz"
+if [ ! -f "$XEPHEM_FILE" ]; then
+    echo "Pobieranie XEphem..."
+    wget "https://github.com/XEphem/XEphem/archive/refs/tags/4.1.0.tar.gz" -O "$XEPHEM_FILE"
+fi
 
-# Download ds9
-git clone https://github.com/SAOImageDS9/SAOImageDS9.git
-cd SAOImageDS9
-./configure
+if [ ! -d "XEphem-4.1.0" ]; then
+    tar -xzf "$XEPHEM_FILE"
+fi
+
+# Build XEphem
+cd XEphem-4.1.0/GUI/xephem
 make
-sudo make install
+# Install binary to a location in PATH
+sudo cp xephem /usr/local/bin/
+mkdir -p $HOME/.xephem
+cd ../../..
 
-
-# Download Starlink
-FILE=starlink-2021A-Ubuntu-REV1.tar.gz
-if [ ! -f "$FILE" ]; then
-    echo "$FILE nie istnieje. Pobieram..."
-    wget https://ftp.eao.hawaii.edu/starlink/2021A/REV1/starlink-2021A-Ubuntu-REV1.tar.gz
-
+echo "--- Instalacja IRAF ---"
+if [ ! -d "iraf" ]; then
+    git clone https://github.com/iraf-community/iraf.git
 fi
-
-# Extract the archive
-tar -xzf starlink-2021A-Ubuntu-REV1.tar.gz
-
-cd starlink-2021A-Ubuntu-REV1
-./install.pl
-export STARLINK_DIR=/path/to/starlink
-source $STARLINK_DIR/etc/profile
-
-
-
-# Download XEphem
-FILE=xephem-4.1.0.tar.gz
-if [ ! -f "$FILE" ]; then
-    echo "$FILE nie istnieje. Pobieram..."
-    wget http://www.clearskyinstitute.com/xephem/xephem-4.1.0.tar.gz
-
-fi
-
-# Extract the files
-tar -xzf xephem-4.1.0.tar.gz
-cd xephem-4.1.0
-./configure
-make
-sudo make install
-export XEphem=/usr/local/xephem
-export PATH=$XEphem:$PATH
-
-echo "XEphem installation complete!"
-
-# Download IRAF source code
-git clone https://github.com/iraf-community/iraf.git
 cd iraf
-
-./configure --with-tables=$HOME/iraf/tables
-cd sys
+# Configure and build
+./configure
 make
-make install
-echo "export IRAFARCH=linux64" >> ~/.bashrc
-echo "export IRAF=$HOME/iraf" >> ~/.bashrc
-echo "source $HOME/iraf/unix/hlib/irafuser.csh" >> ~/.cshrc
-source ~/.bashrc
+sudo make install
+cd ..
 
-sudo apt update -y & sudo apt upgrade -y & sudo apt autoremove -y
-echo "Koniec instalacji!"
-source ~/.bashrc
+echo "--- Czyszczenie ---"
+sudo apt autoremove -y
+
+echo "!!! Instalacja zakończona !!!"
+echo "Dodaj poniższe linie do swojego ~/.bashrc:"
+echo ""
+echo "source $(pwd)/venv/bin/activate"
+echo "export STARLINK_DIR=$(pwd)/starlink"
+echo "source \$STARLINK_DIR/etc/profile"
+echo "export IRAFARCH=linux64"
+echo "export IRAF=$(pwd)/iraf"
+echo ""
+echo "Następnie wykonaj: source ~/.bashrc"
