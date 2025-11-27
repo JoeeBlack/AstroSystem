@@ -10,11 +10,29 @@ mkdir -p astrosystem
 cd astrosystem
 
 echo "--- Aktualizacja systemu ---"
-sudo apt update -y && sudo apt upgrade -y && sudo apt autoremove -y
+export DEBIAN_FRONTEND=noninteractive
+
+# Check for sudo
+if ! command -v sudo &> /dev/null; then
+    echo "Błąd: sudo nie jest zainstalowane. Uruchom ten skrypt jako root lub zainstaluj sudo."
+    exit 1
+fi
+
+echo "Pobieranie list pakietów..."
+sudo apt update -y
+
+echo "Aktualizacja pakietów..."
+sudo apt upgrade -y
+
+echo "Czyszczenie..."
+sudo apt autoremove -y
+
 sudo apt install -y git
 
 echo "--- Instalacja podstawowych narzędzi ---"
-sudo apt install -y software-properties-common
+# Ensure we have the package available
+sudo apt update -y
+sudo apt-get install -y software-properties-common
 sudo add-apt-repository -y universe
 sudo add-apt-repository -y multiverse
 sudo apt update -y
