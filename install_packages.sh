@@ -32,9 +32,23 @@ sudo apt install -y git
 echo "--- Instalacja podstawowych narzędzi ---"
 # Ensure we have the package available
 sudo apt update -y
-sudo apt-get install -y software-properties-common
-sudo add-apt-repository -y universe
-sudo add-apt-repository -y multiverse
+
+# Detect OS Codename
+if [ -f /etc/os-release ]; then
+    . /etc/os-release
+    OS_CODENAME=$VERSION_CODENAME
+else
+    echo "Nie można wykryć wersji systemu. Zakładam 'jammy' (Ubuntu 22.04)."
+    OS_CODENAME="jammy"
+fi
+
+echo "Wykryto system: $OS_CODENAME"
+
+# Enable Universe and Multiverse manually
+echo "deb http://archive.ubuntu.com/ubuntu/ $OS_CODENAME universe multiverse" | sudo tee /etc/apt/sources.list.d/universe-multiverse.list
+echo "deb http://archive.ubuntu.com/ubuntu/ $OS_CODENAME-updates universe multiverse" | sudo tee -a /etc/apt/sources.list.d/universe-multiverse.list
+echo "deb http://security.ubuntu.com/ubuntu/ $OS_CODENAME-security universe multiverse" | sudo tee -a /etc/apt/sources.list.d/universe-multiverse.list
+
 sudo apt update -y
 sudo apt install -y wget python3 python3-venv python3-pip vlc mc nano build-essential saods9
 
@@ -49,7 +63,15 @@ sudo apt install -y \
     tk-dev libxml2-dev libxmlsec1-dev libyaml-dev
 
 echo "--- Instalacja Stellarium (PPA) ---"
-sudo add-apt-repository -y ppa:stellarium/stellarium-releases
+# Manual PPA setup for Stellarium
+STELLARIUM_KEY_URL="https://keyserver.ubuntu.com/pks/lookup?fingerprint=on&op=get&search=0xE12687626702104CAD5B767DEB690A6429908236"
+STELLARIUM_KEYRING="/usr/share/keyrings/stellarium-archive-keyring.gpg"
+
+wget -qO - "$STELLARIUM_KEY_URL" | gpg --dearmor | sudo dd of="$STELLARIUM_KEYRING"
+
+echo "deb [signed-by=$STELLARIUM_KEYRING] https://ppa.launchpadcontent.net/stellarium/stellarium-releases/ubuntu $OS_CODENAME main" | sudo tee /etc/apt/sources.list.d/stellarium.list
+echo "deb-src [signed-by=$STELLARIUM_KEYRING] https://ppa.launchpadcontent.net/stellarium/stellarium-releases/ubuntu $OS_CODENAME main" | sudo tee -a /etc/apt/sources.list.d/stellarium.list
+
 sudo apt update -y
 sudo apt install -y stellarium
 
