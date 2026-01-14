@@ -8,6 +8,7 @@ Niniejsze repozytorium zawiera skrypt `install_packages.sh`, który automatyzuje
 ## 1. Wymagania wstępne
 - **System operacyjny:** Ubuntu 20.04 LTS, 22.04 LTS lub Debian 11/12.
 - **Internet:** Wymagane jest aktywne połączenie internetowe do pobierania pakietów.
+- **Transfer danych:** Instalacja wymaga pobrania około **2.5 GB** danych.
 - **Uprawnienia:** Musisz posiadać uprawnienia `sudo`.
 
 ## 2. Instalacja
@@ -25,6 +26,7 @@ Aby zainstalować oprogramowanie, wykonaj poniższe kroki w terminalu:
 Gdy skrypt zakończy działanie, należy załadować nowe zmienne środowiskowe (niezbędne m.in. dla pakietu Starlink czy IRAF). Aby zastosować zmiany w bieżącej sesji terminala, uruchom:
 ```bash
 source ~/.bashrc
+```
 
 ## 4. Zainstalowane oprogramowanie
 Skrypt instaluje i konfiguruje następujące narzędzia:
@@ -39,9 +41,9 @@ Skrypt instaluje i konfiguruje następujące narzędzia:
 
 ### Narzędzia naukowe i biblioteki
 - **Python 3**: Wraz z podstawowymi bibliotekami.
-- **Phoebe (v1.0.1)**: Oprogramowanie do modelowania układów zaćmieniowych.
-- **Starlink (v2021A-REV1)**: Kompleksowy pakiet oprogramowania astronomicznego.
-- **IRAF (v2.17)**: Image Reduction and Analysis Facility – standardowe narzędzie do redukcji danych astronomicznych.
+- **Phoebe (v2.x)**: Oprogramowanie do modelowania układów zaćmieniowych.
+- **Starlink (v2023A)**: Kompleksowy pakiet oprogramowania astronomicznego.
+- **IRAF (v2.18)**: Image Reduction and Analysis Facility – standardowe narzędzie do redukcji danych astronomicznych.
 
 ## 5. Rozwiązywanie problemów
 - **"Command not found"**: Jeśli po instalacji polecenia takie jak `ds9` czy `iraf` nie działają, upewnij się, że wykonałeś polecenie `source ~/.bashrc`.
