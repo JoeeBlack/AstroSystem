@@ -36,7 +36,7 @@ sudo apt update -y
 # Detect OS Codename
 if [ -f /etc/os-release ]; then
     . /etc/os-release
-    OS_CODENAME=$VERSION_CODENAME
+    OS_CODENAME="$VERSION_CODENAME"
 else
     echo "Nie można wykryć wersji systemu. Zakładam 'jammy' (Ubuntu 22.04)."
     OS_CODENAME="jammy"
@@ -122,7 +122,7 @@ cd XEphem-4.1.0/GUI/xephem
 make
 # Install binary to a location in PATH
 sudo cp xephem /usr/local/bin/
-mkdir -p $HOME/.xephem
+mkdir -p "$HOME/.xephem"
 cd ../../..
 
 echo "--- Instalacja IRAF ---"
