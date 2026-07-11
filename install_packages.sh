@@ -45,9 +45,9 @@ fi
 echo "Wykryto system: $OS_CODENAME"
 
 # Enable Universe and Multiverse manually
-echo "deb http://archive.ubuntu.com/ubuntu/ $OS_CODENAME universe multiverse" | sudo tee /etc/apt/sources.list.d/universe-multiverse.list
-echo "deb http://archive.ubuntu.com/ubuntu/ $OS_CODENAME-updates universe multiverse" | sudo tee -a /etc/apt/sources.list.d/universe-multiverse.list
-echo "deb http://security.ubuntu.com/ubuntu/ $OS_CODENAME-security universe multiverse" | sudo tee -a /etc/apt/sources.list.d/universe-multiverse.list
+echo "deb https://archive.ubuntu.com/ubuntu/ $OS_CODENAME universe multiverse" | sudo tee /etc/apt/sources.list.d/universe-multiverse.list
+echo "deb https://archive.ubuntu.com/ubuntu/ $OS_CODENAME-updates universe multiverse" | sudo tee -a /etc/apt/sources.list.d/universe-multiverse.list
+echo "deb https://security.ubuntu.com/ubuntu/ $OS_CODENAME-security universe multiverse" | sudo tee -a /etc/apt/sources.list.d/universe-multiverse.list
 
 sudo apt update -y
 sudo apt install -y wget python3 python3-venv python3-pip vlc mc nano build-essential saods9
