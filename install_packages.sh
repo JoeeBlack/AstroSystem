@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Stop script on error
-set -e
+set -euo pipefail
 
 echo "Witaj w skrypcie instalacyjnym AstroSystem v2!"
 
